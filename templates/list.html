@@ -1,0 +1,46 @@
+{{define "list"}}
+<!doctype html>
+<html lang="id">
+<head>{{template "head" .}}<title>{{.Title}} — GenSA Kidz Dashboard</title></head>
+<body>
+  {{template "nav" .}}
+  <div class="wrap">
+    {{if .Flash}}<div class="flash">{{.Flash}}</div>{{end}}
+    <div class="page-head">
+      <div>
+        <h1>{{.Title}}</h1>
+        <p class="subtitle">{{.Count}} item{{if .GroupHint}} · {{.GroupHint}}{{end}}</p>
+      </div>
+      <a class="btn" href="{{.NewURL}}">+ Tambah</a>
+    </div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            {{range .Columns}}<th>{{.}}</th>{{end}}
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .Rows}}
+          <tr>
+            <td>{{if .ImageURL}}<img class="thumb" src="{{.ImageURL}}" alt="">{{end}}</td>
+            {{range .Cells}}<td>{{.}}</td>{{end}}
+            <td class="actions">
+              <a class="btn small secondary" href="{{.EditURL}}">Ubah</a>
+              <form method="post" action="{{.DeleteURL}}" style="display:inline" onsubmit="return confirm('Hapus item ini?')">
+                <button class="btn small danger" type="submit">Hapus</button>
+              </form>
+            </td>
+          </tr>
+          {{else}}
+          <tr><td colspan="10">Belum ada data.</td></tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
+{{end}}

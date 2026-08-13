@@ -1,0 +1,61 @@
+{{define "form"}}
+<!doctype html>
+<html lang="id">
+<head>{{template "head" .}}<title>{{.Title}} — GenSA Kidz Dashboard</title></head>
+<body>
+  {{template "nav" .}}
+  <div class="wrap">
+    <div class="page-head">
+      <div>
+        <h1>{{.Title}}</h1>
+        {{if .Subtitle}}<p class="subtitle">{{.Subtitle}}</p>{{end}}
+      </div>
+      <a class="btn secondary" href="{{.BackURL}}">← Kembali</a>
+    </div>
+    <div class="card">
+      <form id="edit-form" class="edit-form" method="post" action="{{.Action}}" enctype="multipart/form-data">
+        {{if .ImageURL}}<img class="image-preview" src="{{.ImageURL}}" alt="">{{end}}
+        {{range .Fields}}
+        <div class="field">
+          <label>{{.Label}}</label>
+          {{if eq .Type "textarea"}}
+            <textarea name="{{.Name}}">{{.Value}}</textarea>
+          {{else if eq .Type "textarea-tall"}}
+            <textarea class="tall" name="{{.Name}}">{{.Value}}</textarea>
+          {{else if eq .Type "list"}}
+            <textarea class="tall" name="{{.Name}}">{{.Value}}</textarea>
+            <p class="hint">Satu poin per baris.</p>
+          {{else if eq .Type "faq"}}
+            <textarea class="tall" name="{{.Name}}">{{.Value}}</textarea>
+            <p class="hint">Format: pertanyaan lalu jawaban di baris berikutnya, dipisah baris kosong antar pasangan.</p>
+          {{else if eq .Type "select"}}
+            <select name="{{.Name}}">
+              {{$cur := .Value}}
+              {{range .Options}}<option value="{{.}}" {{if eq . $cur}}selected{{end}}>{{.}}</option>{{end}}
+            </select>
+          {{else if eq .Type "file"}}
+            <input type="file" name="{{.Name}}" accept="image/*">
+          {{else}}
+            <input type="text" name="{{.Name}}" value="{{.Value}}">
+          {{end}}
+        </div>
+        {{end}}
+      </form>
+      <div class="form-actions">
+        <div>
+          {{if .DeleteURL}}
+          <form method="post" action="{{.DeleteURL}}" onsubmit="return confirm('Hapus item ini?')">
+            <button class="btn danger" type="submit">Hapus</button>
+          </form>
+          {{end}}
+        </div>
+        <div class="right">
+          <a class="btn secondary" href="{{.BackURL}}">Batal</a>
+          <button class="btn" type="submit" form="edit-form">Simpan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+{{end}}

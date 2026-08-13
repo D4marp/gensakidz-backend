@@ -1,0 +1,21 @@
+{{define "dashboard"}}
+<!doctype html>
+<html lang="id">
+<head>{{template "head" .}}<title>Ringkasan — GenSA Kidz Dashboard</title></head>
+<body>
+  {{template "nav" .}}
+  <div class="wrap">
+    <h1>Ringkasan Konten</h1>
+    <p class="subtitle">Semua konten yang tampil di gensakidz.com — klik salah satu untuk mengubah, menambah, atau menghapus.</p>
+    <div class="dash-grid">
+      {{range .Cards}}
+      <a class="dash-card" href="{{.URL}}">
+        <div class="count">{{.Count}}</div>
+        <div class="label">{{.Label}}</div>
+      </a>
+      {{end}}
+    </div>
+  </div>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,26 @@
+{{define "login"}}
+<!doctype html>
+<html lang="id">
+<head>{{template "head" .}}<title>Masuk — GenSA Kidz Dashboard</title></head>
+<body>
+  <div class="login-wrap">
+    <div class="card login-card">
+      <h1>GenSA Kidz</h1>
+      <p class="subtitle">Masuk ke dashboard admin</p>
+      {{if .Error}}<div class="error">{{.Error}}</div>{{end}}
+      <form method="post" action="/login" class="edit-form">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" required autofocus>
+        </div>
+        <div class="field">
+          <label>Kata Sandi</label>
+          <input type="password" name="password" required>
+        </div>
+        <button class="btn" type="submit" style="width:100%">Masuk</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
+{{end}}

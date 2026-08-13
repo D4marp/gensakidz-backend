@@ -1,0 +1,4 @@
+gensakidz.db
+gensakidz.db-*
+uploads/*
+!uploads/.gitkeep
