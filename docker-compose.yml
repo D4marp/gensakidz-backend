@@ -5,14 +5,16 @@ services:
     image: mysql:8.0
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      # The app only ever connects as DB_USER — it never needs root, so we
+      # let MySQL generate a random root password nobody has to manage.
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: ${DB_NAME:-gensakidz}
       MYSQL_USER: ${DB_USER:-gensakidz}
       MYSQL_PASSWORD: ${DB_PASSWORD:-gensakidz}
     volumes:
       - gensakidz_mysql:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpass}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER:-gensakidz}", "-p${DB_PASSWORD:-gensakidz}"]
       interval: 5s
       timeout: 5s
       retries: 10

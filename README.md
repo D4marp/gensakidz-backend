@@ -85,7 +85,6 @@ Login default (**wajib diganti** — lihat bagian Konfigurasi):
 | `DB_USER` | `gensakidz` | User MySQL |
 | `DB_PASSWORD` | `gensakidz` | Password MySQL — **wajib diganti** |
 | `DB_NAME` | `gensakidz` | Nama database |
-| `MYSQL_ROOT_PASSWORD` | `rootpass` | Password root MySQL (khusus `docker-compose.yml`, saat container MySQL pertama kali dibuat) — **wajib diganti** |
 | `ADMIN_EMAIL` | `admin@gensakidz.com` | Email login admin (dipakai hanya saat pertama kali dijalankan) |
 | `ADMIN_PASSWORD` | `gensakidz2026` | Password admin (dipakai hanya saat pertama kali dijalankan) — **wajib diganti** |
 | `UPLOADS_DIR` | `uploads` | Folder penyimpanan foto yang diunggah |
