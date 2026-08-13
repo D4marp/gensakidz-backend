@@ -6,7 +6,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-# modernc.org/sqlite is pure Go — CGO_ENABLED=0 keeps this a static binary,
+# go-sql-driver/mysql is pure Go — CGO_ENABLED=0 keeps this a static binary,
 # no libc/gcc needed at all in the runtime image.
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/server .
 
@@ -18,16 +18,15 @@ RUN apk add --no-cache ca-certificates && \
 WORKDIR /app
 COPY --from=build /out/server ./server
 
-# Everything that must survive a redeploy (the SQLite file + uploaded
-# photos) lives under /app/data, which is meant to be mounted as a volume.
+# Only uploaded photos need to survive a redeploy here — the database itself
+# lives in MySQL (a separate container/volume), not on this filesystem.
 RUN mkdir -p /app/data/uploads && chown -R app:app /app
 USER app
 
-ENV DB_PATH=/app/data/gensakidz.db
 ENV UPLOADS_DIR=/app/data/uploads
 ENV PORT=8080
 
 EXPOSE 8080
-VOLUME ["/app/data"]
+VOLUME ["/app/data/uploads"]
 
 CMD ["./server"]

@@ -1,6 +1,22 @@
 name: gensakidz-backend
 
 services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${DB_NAME:-gensakidz}
+      MYSQL_USER: ${DB_USER:-gensakidz}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-gensakidz}
+    volumes:
+      - gensakidz_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpass}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     build: .
     ports:
@@ -10,9 +26,18 @@ services:
     environment:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@gensakidz.com}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-gensakidz2026}
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-gensakidz}
+      DB_PASSWORD: ${DB_PASSWORD:-gensakidz}
+      DB_NAME: ${DB_NAME:-gensakidz}
     volumes:
-      - gensakidz_data:/app/data
+      - gensakidz_uploads:/app/data/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
-  gensakidz_data:
+  gensakidz_mysql:
+  gensakidz_uploads:

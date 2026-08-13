@@ -3,134 +3,185 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
+	"time"
 
-	_ "modernc.org/sqlite"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var db *sql.DB
 
-func openDB(path string) *sql.DB {
-	conn, err := sql.Open("sqlite", path)
+// mysqlDSN builds a go-sql-driver/mysql DSN from discrete connection
+// parameters — easier to wire up via docker-compose / PaaS env vars than a
+// single connection-string env var.
+func mysqlDSN(host, port, user, password, name string) string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4&loc=Local",
+		user, password, host, port, name)
+}
+
+// openDB connects to MySQL, retrying for a bit since in docker-compose the
+// backend container often starts before MySQL is ready to accept connections.
+func openDB(dsn string) *sql.DB {
+	conn, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("open db: %v", err)
 	}
-	if _, err := conn.Exec("PRAGMA foreign_keys = ON"); err != nil {
-		log.Fatalf("pragma: %v", err)
+	conn.SetMaxOpenConns(10)
+	conn.SetConnMaxLifetime(time.Hour)
+
+	var lastErr error
+	for i := 0; i < 20; i++ {
+		if lastErr = conn.Ping(); lastErr == nil {
+			return conn
+		}
+		log.Printf("waiting for MySQL... (%v)", lastErr)
+		time.Sleep(2 * time.Second)
 	}
-	return conn
+	log.Fatalf("could not connect to MySQL: %v", lastErr)
+	return nil
 }
 
 const schema = `
 CREATE TABLE IF NOT EXISTS admin_users (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	email TEXT UNIQUE NOT NULL,
-	password_hash TEXT NOT NULL
-);
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	email VARCHAR(255) UNIQUE NOT NULL,
+	password_hash VARCHAR(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS sessions (
-	token TEXT PRIMARY KEY,
-	user_id INTEGER NOT NULL,
+	token VARCHAR(64) PRIMARY KEY,
+	user_id INT NOT NULL,
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS services (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	slug TEXT UNIQUE NOT NULL,
-	title TEXT NOT NULL,
-	icon TEXT NOT NULL,
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	slug VARCHAR(255) UNIQUE NOT NULL,
+	title VARCHAR(255) NOT NULL,
+	icon VARCHAR(50) NOT NULL,
 	short TEXT NOT NULL,
-	detail TEXT NOT NULL DEFAULT '[]',
-	for_who TEXT NOT NULL DEFAULT '',
-	signs TEXT NOT NULL DEFAULT '[]',
-	goal TEXT NOT NULL DEFAULT '',
-	process TEXT NOT NULL DEFAULT '[]',
-	duration TEXT NOT NULL DEFAULT '',
-	professionals TEXT NOT NULL DEFAULT '',
-	what_to_bring TEXT NOT NULL DEFAULT '[]',
-	extra_faq TEXT NOT NULL DEFAULT '[]',
-	image_path TEXT NOT NULL DEFAULT '',
-	sort_order INTEGER NOT NULL DEFAULT 0
-);
+	detail TEXT NOT NULL,
+	for_who TEXT NOT NULL,
+	signs TEXT NOT NULL,
+	goal TEXT NOT NULL,
+	process TEXT NOT NULL,
+	duration VARCHAR(255) NOT NULL DEFAULT '',
+	professionals VARCHAR(255) NOT NULL DEFAULT '',
+	what_to_bring TEXT NOT NULL,
+	extra_faq TEXT NOT NULL,
+	image_path VARCHAR(500) NOT NULL DEFAULT '',
+	sort_order INT NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS jobs (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	slug TEXT UNIQUE NOT NULL,
-	title TEXT NOT NULL,
-	branch TEXT NOT NULL DEFAULT 'Lamongan',
-	type TEXT NOT NULL DEFAULT 'Full-time',
-	status TEXT NOT NULL DEFAULT 'Dibuka',
-	description TEXT NOT NULL DEFAULT '',
-	requirements TEXT NOT NULL DEFAULT '[]',
-	sort_order INTEGER NOT NULL DEFAULT 0
-);
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	slug VARCHAR(255) UNIQUE NOT NULL,
+	title VARCHAR(255) NOT NULL,
+	branch VARCHAR(100) NOT NULL DEFAULT 'Lamongan',
+	type VARCHAR(50) NOT NULL DEFAULT 'Full-time',
+	status VARCHAR(50) NOT NULL DEFAULT 'Dibuka',
+	description TEXT NOT NULL,
+	requirements TEXT NOT NULL,
+	sort_order INT NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS articles (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	slug TEXT UNIQUE NOT NULL,
-	title TEXT NOT NULL,
-	category TEXT NOT NULL DEFAULT '',
-	excerpt TEXT NOT NULL DEFAULT '',
-	content TEXT NOT NULL DEFAULT '[]',
-	image_path TEXT NOT NULL DEFAULT '',
-	sort_order INTEGER NOT NULL DEFAULT 0
-);
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	slug VARCHAR(255) UNIQUE NOT NULL,
+	title VARCHAR(255) NOT NULL,
+	category VARCHAR(100) NOT NULL DEFAULT '',
+	excerpt TEXT NOT NULL,
+	content TEXT NOT NULL,
+	image_path VARCHAR(500) NOT NULL DEFAULT '',
+	sort_order INT NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS facilities (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	title TEXT NOT NULL,
-	description TEXT NOT NULL DEFAULT '',
-	icon TEXT NOT NULL DEFAULT 'heart',
-	image_path TEXT NOT NULL DEFAULT '',
-	sort_order INTEGER NOT NULL DEFAULT 0
-);
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	title VARCHAR(255) NOT NULL,
+	description TEXT NOT NULL,
+	icon VARCHAR(50) NOT NULL DEFAULT 'heart',
+	image_path VARCHAR(500) NOT NULL DEFAULT '',
+	sort_order INT NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS gallery_photos (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	category TEXT NOT NULL DEFAULT 'aktivitas',
-	caption TEXT NOT NULL DEFAULT '',
-	image_path TEXT NOT NULL DEFAULT '',
-	sort_order INTEGER NOT NULL DEFAULT 0
-);
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	category VARCHAR(50) NOT NULL DEFAULT 'aktivitas',
+	caption VARCHAR(255) NOT NULL DEFAULT '',
+	image_path VARCHAR(500) NOT NULL DEFAULT '',
+	sort_order INT NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS team_members (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	name TEXT NOT NULL,
-	role TEXT NOT NULL DEFAULT '',
-	image_path TEXT NOT NULL DEFAULT '',
-	sort_order INTEGER NOT NULL DEFAULT 0
-);
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(255) NOT NULL,
+	role VARCHAR(255) NOT NULL DEFAULT '',
+	image_path VARCHAR(500) NOT NULL DEFAULT '',
+	sort_order INT NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS branches (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	slug TEXT UNIQUE NOT NULL,
-	name TEXT NOT NULL,
-	address TEXT NOT NULL DEFAULT '',
-	whatsapp TEXT NOT NULL DEFAULT '',
-	phone TEXT NOT NULL DEFAULT '',
-	maps_query TEXT NOT NULL DEFAULT '',
-	maps_url TEXT NOT NULL DEFAULT '',
-	schedules TEXT NOT NULL DEFAULT '[]'
-);
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	slug VARCHAR(255) UNIQUE NOT NULL,
+	name VARCHAR(255) NOT NULL,
+	address TEXT NOT NULL,
+	whatsapp VARCHAR(50) NOT NULL DEFAULT '',
+	phone VARCHAR(50) NOT NULL DEFAULT '',
+	maps_query VARCHAR(500) NOT NULL DEFAULT '',
+	maps_url VARCHAR(500) NOT NULL DEFAULT '',
+	schedules TEXT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS testimonials (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	name TEXT NOT NULL,
-	role TEXT NOT NULL DEFAULT '',
-	quote TEXT NOT NULL DEFAULT '',
-	sort_order INTEGER NOT NULL DEFAULT 0
-);
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(255) NOT NULL,
+	role VARCHAR(255) NOT NULL DEFAULT '',
+	quote TEXT NOT NULL,
+	sort_order INT NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS site_settings (
-	key TEXT PRIMARY KEY,
-	value TEXT NOT NULL DEFAULT ''
-);
+	setting_key VARCHAR(100) PRIMARY KEY,
+	value TEXT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 `
 
 func migrate(conn *sql.DB) {
-	if _, err := conn.Exec(schema); err != nil {
-		log.Fatalf("migrate: %v", err)
+	for _, stmt := range splitStatements(schema) {
+		if _, err := conn.Exec(stmt); err != nil {
+			log.Fatalf("migrate: %v\nstatement: %s", err, stmt)
+		}
 	}
+}
+
+// splitStatements splits the schema block on ";" — MySQL's driver doesn't
+// support multi-statement Exec by default, unlike SQLite.
+func splitStatements(s string) []string {
+	var out []string
+	start := 0
+	for i := 0; i < len(s); i++ {
+		if s[i] == ';' {
+			stmt := trimSchema(s[start:i])
+			if stmt != "" {
+				out = append(out, stmt)
+			}
+			start = i + 1
+		}
+	}
+	return out
+}
+
+func trimSchema(s string) string {
+	start, end := 0, len(s)
+	for start < end && (s[start] == '\n' || s[start] == ' ' || s[start] == '\t') {
+		start++
+	}
+	for end > start && (s[end-1] == '\n' || s[end-1] == ' ' || s[end-1] == '\t') {
+		end--
+	}
+	return s[start:end]
 }
 
 // --- small JSON array helpers ---

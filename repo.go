@@ -300,7 +300,7 @@ func deleteTestimonial(id int64) { db.Exec(`DELETE FROM testimonials WHERE id=?`
 
 func getSetting(key, def string) string {
 	var v string
-	err := db.QueryRow(`SELECT value FROM site_settings WHERE key=?`, key).Scan(&v)
+	err := db.QueryRow(`SELECT value FROM site_settings WHERE setting_key=?`, key).Scan(&v)
 	if err == sql.ErrNoRows || err != nil {
 		return def
 	}
@@ -308,7 +308,7 @@ func getSetting(key, def string) string {
 }
 
 func setSetting(key, value string) {
-	db.Exec(`INSERT INTO site_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value`, key, value)
+	db.Exec(`INSERT INTO site_settings (setting_key,value) VALUES (?,?) ON DUPLICATE KEY UPDATE value=VALUES(value)`, key, value)
 }
 
 var settingsKeys = []struct{ Key, Label string }{

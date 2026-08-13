@@ -11,8 +11,15 @@ func main() {
 	uploadsDir = envOr("UPLOADS_DIR", uploadsDir)
 	os.MkdirAll(uploadsDir, 0o755)
 
-	dbPath := envOr("DB_PATH", "gensakidz.db")
-	db = openDB(dbPath)
+	dsn := mysqlDSN(
+		envOr("DB_HOST", "127.0.0.1"),
+		envOr("DB_PORT", "3306"),
+		envOr("DB_USER", "gensakidz"),
+		envOr("DB_PASSWORD", "gensakidz"),
+		envOr("DB_NAME", "gensakidz"),
+	)
+	db = openDB(dsn)
+	defer db.Close()
 	migrate(db)
 
 	adminEmail := envOr("ADMIN_EMAIL", "admin@gensakidz.com")
