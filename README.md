@@ -82,19 +82,20 @@ tersimpan di volume Docker:
 
 ```bash
 cd backend
+cp .env.example .env    # lalu edit .env — minimal ganti ADMIN_PASSWORD
 docker compose up -d --build
 ```
 
-Server jalan di `http://localhost:8080`. Data (database SQLite + foto
-yang diunggah) tersimpan di Docker volume `gensakidz_data` — aman biarpun
-container dihapus dan dibuat ulang (mis. setiap kali redeploy).
+Server jalan di `http://localhost:8097` (port host bisa diganti lewat
+`HOST_PORT` di `.env`, dipilih bukan 8080 dari awal supaya tidak gampang
+bentrok dengan service lain di komputer/server yang sama). Data (database
+SQLite + foto yang diunggah) tersimpan di Docker volume `gensakidz_data`
+— aman biarpun container dihapus dan dibuat ulang (mis. setiap kali
+redeploy).
 
-Ganti kredensial admin sejak awal lewat file `.env` di folder `backend/`:
-
-```
-ADMIN_EMAIL=owner@gensakidz.com
-ADMIN_PASSWORD=kata-sandi-kuat
-```
+`.env` (lihat `.env.example` untuk daftar lengkap variabelnya) tidak
+ikut ke git — setiap deploy baru wajib bikin `.env` sendiri dan ganti
+`ADMIN_PASSWORD` dari nilai default.
 
 Perintah lain yang berguna:
 
