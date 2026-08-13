@@ -10,6 +10,9 @@ import (
 //go:embed templates/*.html
 var templatesFS embed.FS
 
+//go:embed static
+var staticFS embed.FS
+
 var tmpl = template.Must(template.ParseFS(templatesFS, "templates/*.html"))
 
 type Card struct {

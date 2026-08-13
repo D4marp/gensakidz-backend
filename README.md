@@ -74,17 +74,60 @@ ADMIN_EMAIL=owner@gensakidz.com ADMIN_PASSWORD="kata-sandi-kuat" go run .
   belum dilakukan di sesi ini supaya situs yang sudah live tidak berisiko
   ikut berubah sebelum dashboard ini benar-benar dites dan diisi datanya.
 
-## Deploy
+## Menjalankan via Docker
 
-Backend ini berdiri sendiri (binary Go + file SQLite + folder uploads),
-bisa dijalankan di VPS mana pun (mis. Railway, Fly.io, VPS biasa) — beda
-platform dari Vercel yang dipakai untuk situs Next.js sekarang. Untuk
-build production:
+Cara paling praktis untuk menjalankan (lokal maupun deploy) — sudah diuji
+build, restart, dan redeploy penuh (`down` lalu `up`), datanya tetap aman
+tersimpan di volume Docker:
 
 ```bash
-go build -o gensakidz-backend .
-./gensakidz-backend
+cd backend
+docker compose up -d --build
 ```
 
-Pastikan folder `uploads/` dan file `gensakidz.db` ikut di-backup/persist —
-keduanya menyimpan semua data & foto yang diunggah lewat dashboard.
+Server jalan di `http://localhost:8080`. Data (database SQLite + foto
+yang diunggah) tersimpan di Docker volume `gensakidz_data` — aman biarpun
+container dihapus dan dibuat ulang (mis. setiap kali redeploy).
+
+Ganti kredensial admin sejak awal lewat file `.env` di folder `backend/`:
+
+```
+ADMIN_EMAIL=owner@gensakidz.com
+ADMIN_PASSWORD=kata-sandi-kuat
+```
+
+Perintah lain yang berguna:
+
+```bash
+docker compose logs -f backend   # lihat log
+docker compose restart backend   # restart tanpa kehilangan data
+docker compose down              # hentikan & hapus container (volume tetap ada)
+```
+
+`Dockerfile` pakai multi-stage build (`CGO_ENABLED=0`, image akhir
+`alpine`, jalan sebagai user non-root) — image jadi kecil dan tidak
+butuh Go/toolchain apa pun di server tujuan, cukup Docker saja.
+
+## Deploy ke hosting gratis (Fly.io)
+
+Backend ini butuh **disk permanen** (untuk file SQLite + foto upload),
+jadi platform serverless murni (Vercel, Netlify, tier gratis
+Render/Railway) tidak cocok — datanya akan hilang tiap restart. Fly.io
+mendukung volume permanen dan punya jatah gratis yang cukup untuk skala
+klinik kecil begini:
+
+```bash
+brew install flyctl        # atau lihat fly.io/docs/getting-started
+fly auth login
+cd backend
+fly launch --no-deploy      # pilih region Singapore (sin) biar dekat
+fly volumes create gensakidz_data --size 1 --region sin
+fly deploy
+fly secrets set ADMIN_EMAIL=owner@gensakidz.com ADMIN_PASSWORD="kata-sandi-kuat"
+```
+
+Saat `fly launch` menanyakan konfigurasi, pastikan `fly.toml` yang
+dihasilkan me-mount volume ke `/app/data` (samakan dengan `DB_PATH` dan
+`UPLOADS_DIR` di atas) — detail lengkap ada di dokumentasi Fly.io karena
+`fly launch` bersifat interaktif dan hasilnya tergantung pilihan saat
+setup.

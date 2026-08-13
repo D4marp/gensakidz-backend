@@ -1,12 +1,14 @@
 package main
 
 import (
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
 )
 
 func main() {
+	uploadsDir = envOr("UPLOADS_DIR", uploadsDir)
 	os.MkdirAll(uploadsDir, 0o755)
 
 	dbPath := envOr("DB_PATH", "gensakidz.db")
@@ -20,8 +22,9 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// static assets + uploaded images
-	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	// static assets (embedded in the binary) + uploaded images (on disk, mounted as a volume)
+	staticSub, _ := fs.Sub(staticFS, "static")
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticSub))))
 	mux.Handle("GET /uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadsDir))))
 
 	// auth

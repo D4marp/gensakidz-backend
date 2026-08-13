@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-const uploadsDir = "uploads"
+var uploadsDir = "uploads"
 
 // saveUpload reads the "image" file field from a multipart form (if present)
 // and stores it under uploads/, returning its public path. If no file was

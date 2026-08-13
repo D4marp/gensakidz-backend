@@ -1,0 +1,6 @@
+gensakidz.db
+gensakidz.db-*
+uploads/
+gensa-backend
+*.log
+.git

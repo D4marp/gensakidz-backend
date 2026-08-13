@@ -1,0 +1,16 @@
+name: gensakidz-backend
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@gensakidz.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-gensakidz2026}
+    volumes:
+      - gensakidz_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  gensakidz_data:
