@@ -185,7 +185,7 @@ func handleJobNew(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleJobCreate(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	r.ParseMultipartForm(20 << 20)
 	saveJob(Job{
 		Slug: r.FormValue("slug"), Title: r.FormValue("title"), Branch: r.FormValue("branch"),
 		Type: r.FormValue("type"), Status: r.FormValue("status"), Description: r.FormValue("description"),
@@ -210,7 +210,7 @@ func handleJobUpdate(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	r.ParseForm()
+	r.ParseMultipartForm(20 << 20)
 	j.Slug, j.Title, j.Branch = r.FormValue("slug"), r.FormValue("title"), r.FormValue("branch")
 	j.Type, j.Status, j.Description = r.FormValue("type"), r.FormValue("status"), r.FormValue("description")
 	j.Requirements = linesToList(r.FormValue("requirements"))
@@ -560,7 +560,7 @@ func handleBranchNew(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleBranchCreate(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	r.ParseMultipartForm(20 << 20)
 	saveBranch(Branch{
 		Slug: r.FormValue("slug"), Name: r.FormValue("name"), Address: r.FormValue("address"),
 		WhatsApp: r.FormValue("whatsapp"), Phone: r.FormValue("phone"),
@@ -588,7 +588,7 @@ func handleBranchUpdate(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	r.ParseForm()
+	r.ParseMultipartForm(20 << 20)
 	b.Slug, b.Name, b.Address = r.FormValue("slug"), r.FormValue("name"), r.FormValue("address")
 	b.WhatsApp, b.Phone = r.FormValue("whatsapp"), r.FormValue("phone")
 	b.MapsQuery, b.MapsURL = r.FormValue("maps_query"), r.FormValue("maps_url")
@@ -633,7 +633,7 @@ func handleTestimonialNew(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleTestimonialCreate(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	r.ParseMultipartForm(20 << 20)
 	saveTestimonial(Testimonial{Name: r.FormValue("name"), Role: r.FormValue("role"), Quote: r.FormValue("quote"), SortOrder: 999})
 	http.Redirect(w, r, "/admin/testimonials", http.StatusSeeOther)
 }
@@ -654,7 +654,7 @@ func handleTestimonialUpdate(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	r.ParseForm()
+	r.ParseMultipartForm(20 << 20)
 	t.Name, t.Role, t.Quote = r.FormValue("name"), r.FormValue("role"), r.FormValue("quote")
 	saveTestimonial(t)
 	http.Redirect(w, r, "/admin/testimonials", http.StatusSeeOther)
