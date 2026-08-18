@@ -5,8 +5,7 @@
 <body>
   <div class="login-wrap">
     <div class="card login-card">
-      <div class="login-logo">GK</div>
-      <h1>GenSA Kidz</h1>
+      <div class="login-logo-plate"><img class="login-logo" src="/static/logo.png" alt="GenSA Kidz"></div>
       <p class="subtitle">Masuk ke dashboard admin</p>
       {{if .Error}}<div class="error">{{.Error}}</div>{{end}}
       <form method="post" action="/login" class="edit-form">

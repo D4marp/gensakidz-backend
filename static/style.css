@@ -48,17 +48,15 @@ a { color: inherit; }
   overflow-y: auto;
 }
 
-.sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 4px 10px 24px; }
-.sidebar-logo {
-  width: 40px; height: 40px; flex-shrink: 0;
-  border-radius: 12px;
-  background: var(--marigold-500);
-  color: var(--brand-950);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 14px; letter-spacing: 0.02em;
+.sidebar-brand { padding: 4px 6px 22px; }
+.sidebar-logo-plate {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: inline-flex;
 }
-.sidebar-title { font-weight: 700; font-size: 15px; }
-.sidebar-subtitle { font-size: 12px; opacity: 0.6; margin-top: 1px; }
+.sidebar-logo { display: block; width: 140px; height: auto; }
+.sidebar-subtitle { font-size: 12px; opacity: 0.6; margin-top: 8px; padding: 0 4px; }
 
 .sidebar-nav { display: flex; flex-direction: column; gap: 3px; flex: 1; }
 .sidebar-nav a {
@@ -256,14 +254,8 @@ select { cursor: pointer; }
 
 .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--surface-2); padding: 20px; }
 .login-card { width: 100%; max-width: 380px; box-shadow: var(--shadow-lg); text-align: center; }
-.login-logo {
-  width: 52px; height: 52px; margin: 0 auto 16px;
-  border-radius: 16px;
-  background: var(--marigold-500);
-  color: var(--brand-950);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 17px;
-}
+.login-logo-plate { display: inline-flex; margin: 0 auto 18px; }
+.login-logo { display: block; width: 220px; height: auto; max-width: 100%; }
 .login-card h1 { text-align: center; }
 .login-card .subtitle { text-align: center; }
 .login-card .edit-form { text-align: left; margin-top: 12px; }
