@@ -34,6 +34,7 @@ type Job struct {
 	Status       string // Dibuka | Ditutup
 	Description  string
 	Requirements []string
+	ImagePath    string
 	SortOrder    int
 }
 

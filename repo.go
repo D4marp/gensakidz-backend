@@ -47,13 +47,13 @@ func deleteService(id int64) { db.Exec(`DELETE FROM services WHERE id=?`, id) }
 // ---------- Jobs ----------
 
 func listJobs() []Job {
-	rows, _ := db.Query(`SELECT id,slug,title,branch,type,status,description,requirements,sort_order FROM jobs ORDER BY sort_order, id`)
+	rows, _ := db.Query(`SELECT id,slug,title,branch,type,status,description,requirements,image_path,sort_order FROM jobs ORDER BY sort_order, id`)
 	defer rows.Close()
 	var out []Job
 	for rows.Next() {
 		var j Job
 		var req string
-		rows.Scan(&j.ID, &j.Slug, &j.Title, &j.Branch, &j.Type, &j.Status, &j.Description, &req, &j.SortOrder)
+		rows.Scan(&j.ID, &j.Slug, &j.Title, &j.Branch, &j.Type, &j.Status, &j.Description, &req, &j.ImagePath, &j.SortOrder)
 		j.Requirements = fromJSONStrings(req)
 		out = append(out, j)
 	}
@@ -63,8 +63,8 @@ func listJobs() []Job {
 func getJob(id int64) (Job, bool) {
 	var j Job
 	var req string
-	err := db.QueryRow(`SELECT id,slug,title,branch,type,status,description,requirements,sort_order FROM jobs WHERE id=?`, id).
-		Scan(&j.ID, &j.Slug, &j.Title, &j.Branch, &j.Type, &j.Status, &j.Description, &req, &j.SortOrder)
+	err := db.QueryRow(`SELECT id,slug,title,branch,type,status,description,requirements,image_path,sort_order FROM jobs WHERE id=?`, id).
+		Scan(&j.ID, &j.Slug, &j.Title, &j.Branch, &j.Type, &j.Status, &j.Description, &req, &j.ImagePath, &j.SortOrder)
 	if err != nil {
 		return j, false
 	}
@@ -74,12 +74,12 @@ func getJob(id int64) (Job, bool) {
 
 func saveJob(j Job) {
 	if j.ID == 0 {
-		db.Exec(`INSERT INTO jobs (slug,title,branch,type,status,description,requirements,sort_order) VALUES (?,?,?,?,?,?,?,?)`,
-			j.Slug, j.Title, j.Branch, j.Type, j.Status, j.Description, toJSON(j.Requirements), j.SortOrder)
+		db.Exec(`INSERT INTO jobs (slug,title,branch,type,status,description,requirements,image_path,sort_order) VALUES (?,?,?,?,?,?,?,?,?)`,
+			j.Slug, j.Title, j.Branch, j.Type, j.Status, j.Description, toJSON(j.Requirements), j.ImagePath, j.SortOrder)
 		return
 	}
-	db.Exec(`UPDATE jobs SET slug=?,title=?,branch=?,type=?,status=?,description=?,requirements=?,sort_order=? WHERE id=?`,
-		j.Slug, j.Title, j.Branch, j.Type, j.Status, j.Description, toJSON(j.Requirements), j.SortOrder, j.ID)
+	db.Exec(`UPDATE jobs SET slug=?,title=?,branch=?,type=?,status=?,description=?,requirements=?,image_path=?,sort_order=? WHERE id=?`,
+		j.Slug, j.Title, j.Branch, j.Type, j.Status, j.Description, toJSON(j.Requirements), j.ImagePath, j.SortOrder, j.ID)
 }
 
 func deleteJob(id int64) { db.Exec(`DELETE FROM jobs WHERE id=?`, id) }

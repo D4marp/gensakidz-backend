@@ -5,20 +5,44 @@
 {{end}}
 
 {{define "nav"}}
-<div class="topbar">
-  <div class="brand">GenSA Kidz · Dashboard</div>
-  <nav>
-    <a href="/admin">Ringkasan</a>
-    <a href="/admin/services">Layanan</a>
-    <a href="/admin/jobs">Karir</a>
-    <a href="/admin/articles">Artikel</a>
-    <a href="/admin/facilities">Fasilitas</a>
-    <a href="/admin/gallery">Galeri</a>
-    <a href="/admin/team">Tim</a>
-    <a href="/admin/branches">Cabang</a>
-    <a href="/admin/testimonials">Testimoni</a>
-    <a href="/admin/settings">Pengaturan Situs</a>
-  </nav>
-  <a class="logout" href="/logout">Keluar</a>
-</div>
+<div class="app">
+  <input type="checkbox" id="nav-toggle" class="nav-toggle-input">
+  <label for="nav-toggle" class="nav-backdrop"></label>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="sidebar-logo">GK</span>
+      <div>
+        <div class="sidebar-title">GenSA Kidz</div>
+        <div class="sidebar-subtitle">Dashboard Admin</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/admin"><span class="nav-icon">🏠</span>Ringkasan</a>
+      <a href="/admin/services"><span class="nav-icon">🩺</span>Layanan</a>
+      <a href="/admin/jobs"><span class="nav-icon">💼</span>Karir</a>
+      <a href="/admin/articles"><span class="nav-icon">📰</span>Artikel</a>
+      <a href="/admin/facilities"><span class="nav-icon">🏢</span>Fasilitas</a>
+      <a href="/admin/gallery"><span class="nav-icon">🖼️</span>Galeri</a>
+      <a href="/admin/team"><span class="nav-icon">🧑‍⚕️</span>Tim</a>
+      <a href="/admin/branches"><span class="nav-icon">📍</span>Cabang</a>
+      <a href="/admin/testimonials"><span class="nav-icon">💬</span>Testimoni</a>
+      <a href="/admin/settings"><span class="nav-icon">⚙️</span>Pengaturan Situs</a>
+    </nav>
+    <a class="sidebar-logout" href="/logout"><span class="nav-icon">↩</span>Keluar</a>
+  </aside>
+  <script>
+    (function () {
+      var path = window.location.pathname;
+      document.querySelectorAll(".sidebar-nav a").forEach(function (a) {
+        var href = a.getAttribute("href");
+        var isMatch = href === "/admin" ? path === "/admin" : path.indexOf(href) === 0;
+        if (isMatch) a.classList.add("active");
+      });
+    })();
+  </script>
+  <div class="main">
+    <header class="mobile-topbar">
+      <label for="nav-toggle" class="hamburger" aria-label="Buka menu">☰</label>
+      <span class="mobile-brand">GenSA Kidz · Dashboard</span>
+    </header>
 {{end}}

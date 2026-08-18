@@ -160,6 +160,7 @@ func handleJobsList(w http.ResponseWriter, r *http.Request) {
 			Cells:     []string{j.Title, j.Type, j.Status},
 			EditURL:   "/admin/jobs/" + strconv.FormatInt(j.ID, 10) + "/edit",
 			DeleteURL: "/admin/jobs/" + strconv.FormatInt(j.ID, 10) + "/delete",
+			ImageURL:  j.ImagePath,
 		})
 	}
 	render(w, "list", ListPage{Title: "Lowongan Karir", NewURL: "/admin/jobs/new", Columns: []string{"Posisi", "Jenis", "Status"}, Rows: rows, Count: len(items)})
@@ -167,15 +168,16 @@ func handleJobsList(w http.ResponseWriter, r *http.Request) {
 
 func jobForm(j Job, action, backURL, deleteURL, title string) FormPage {
 	return FormPage{
-		Title: title, Action: action, BackURL: backURL, DeleteURL: deleteURL,
+		Title: title, Action: action, BackURL: backURL, DeleteURL: deleteURL, ImageURL: j.ImagePath,
 		Fields: []FieldDef{
 			{Name: "slug", Label: "Slug", Type: "text", Value: j.Slug},
 			{Name: "title", Label: "Nama Posisi", Type: "text", Value: j.Title},
 			{Name: "branch", Label: "Cabang", Type: "text", Value: j.Branch},
 			{Name: "type", Label: "Jenis Pekerjaan", Type: "select", Value: j.Type, Options: jobTypeOptions},
 			{Name: "status", Label: "Status Lowongan", Type: "select", Value: j.Status, Options: jobStatusOptions},
-			{Name: "description", Label: "Deskripsi Pekerjaan", Type: "textarea", Value: j.Description},
-			{Name: "requirements", Label: "Persyaratan", Type: "list", Value: listToLines(j.Requirements)},
+			{Name: "description", Label: "Deskripsi Pekerjaan (opsional jika pakai flyer)", Type: "textarea", Value: j.Description},
+			{Name: "requirements", Label: "Persyaratan (opsional jika pakai flyer)", Type: "list", Value: listToLines(j.Requirements)},
+			{Name: "image", Label: "Flyer / Gambar Lowongan (opsional)", Type: "file"},
 		},
 	}
 }
@@ -189,7 +191,8 @@ func handleJobCreate(w http.ResponseWriter, r *http.Request) {
 	saveJob(Job{
 		Slug: r.FormValue("slug"), Title: r.FormValue("title"), Branch: r.FormValue("branch"),
 		Type: r.FormValue("type"), Status: r.FormValue("status"), Description: r.FormValue("description"),
-		Requirements: linesToList(r.FormValue("requirements")), SortOrder: 999,
+		Requirements: linesToList(r.FormValue("requirements")), ImagePath: saveUpload(r, "image", ""),
+		SortOrder: 999,
 	})
 	http.Redirect(w, r, "/admin/jobs", http.StatusSeeOther)
 }
@@ -214,6 +217,7 @@ func handleJobUpdate(w http.ResponseWriter, r *http.Request) {
 	j.Slug, j.Title, j.Branch = r.FormValue("slug"), r.FormValue("title"), r.FormValue("branch")
 	j.Type, j.Status, j.Description = r.FormValue("type"), r.FormValue("status"), r.FormValue("description")
 	j.Requirements = linesToList(r.FormValue("requirements"))
+	j.ImagePath = saveUpload(r, "image", j.ImagePath)
 	saveJob(j)
 	http.Redirect(w, r, "/admin/jobs", http.StatusSeeOther)
 }

@@ -34,13 +34,26 @@
               {{range .Options}}<option value="{{.}}" {{if eq . $cur}}selected{{end}}>{{.}}</option>{{end}}
             </select>
           {{else if eq .Type "file"}}
-            <input type="file" name="{{.Name}}" accept="image/*">
+            <label class="file-input">
+              <input type="file" name="{{.Name}}" accept="image/*">
+              <span>📎 Pilih atau ganti gambar</span>
+            </label>
+            <p class="hint">Format JPG/PNG. Kosongkan jika tidak ingin mengganti gambar yang sudah ada.</p>
           {{else}}
             <input type="text" name="{{.Name}}" value="{{.Value}}">
           {{end}}
         </div>
         {{end}}
       </form>
+      <script>
+        document.querySelectorAll(".file-input input[type=file]").forEach(function (input) {
+          var label = input.closest(".file-input").querySelector("span");
+          var original = label.textContent;
+          input.addEventListener("change", function () {
+            label.textContent = input.files.length ? "✅ " + input.files[0].name : original;
+          });
+        });
+      </script>
       <div class="form-actions">
         <div>
           {{if .DeleteURL}}
@@ -55,6 +68,8 @@
         </div>
       </div>
     </div>
+  </div>
+  </div>
   </div>
 </body>
 </html>

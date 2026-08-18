@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS jobs (
 	status VARCHAR(50) NOT NULL DEFAULT 'Dibuka',
 	description TEXT NOT NULL,
 	requirements TEXT NOT NULL,
+	image_path VARCHAR(500) NOT NULL DEFAULT '',
 	sort_order INT NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -153,6 +154,27 @@ func migrate(conn *sql.DB) {
 		if _, err := conn.Exec(stmt); err != nil {
 			log.Fatalf("migrate: %v\nstatement: %s", err, stmt)
 		}
+	}
+	addColumnIfMissing(conn, "jobs", "image_path", "VARCHAR(500) NOT NULL DEFAULT ''")
+}
+
+// addColumnIfMissing runs an ALTER TABLE ADD COLUMN only if the column
+// doesn't already exist — MySQL (unlike MariaDB) has no "ADD COLUMN IF NOT
+// EXISTS" syntax, so this checks information_schema first.
+func addColumnIfMissing(conn *sql.DB, table, column, definition string) {
+	var count int
+	err := conn.QueryRow(
+		`SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
+		table, column,
+	).Scan(&count)
+	if err != nil {
+		log.Fatalf("check column %s.%s: %v", table, column, err)
+	}
+	if count > 0 {
+		return
+	}
+	if _, err := conn.Exec(fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s", table, column, definition)); err != nil {
+		log.Fatalf("add column %s.%s: %v", table, column, err)
 	}
 }
 
