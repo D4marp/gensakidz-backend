@@ -9,7 +9,9 @@ import (
 
 func main() {
 	uploadsDir = envOr("UPLOADS_DIR", uploadsDir)
-	os.MkdirAll(uploadsDir, 0o755)
+	if err := os.MkdirAll(uploadsDir, 0o755); err != nil {
+		log.Fatalf("could not create UPLOADS_DIR %q: %v", uploadsDir, err)
+	}
 
 	dsn := mysqlDSN(
 		envOr("DB_HOST", "127.0.0.1"),
