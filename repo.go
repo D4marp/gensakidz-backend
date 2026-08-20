@@ -1,11 +1,18 @@
 package main
 
-import "database/sql"
+import (
+	"database/sql"
+	"log"
+)
 
 // ---------- Services ----------
 
 func listServices() []Service {
-	rows, _ := db.Query(`SELECT id,slug,title,icon,short,detail,for_who,signs,goal,process,duration,professionals,what_to_bring,extra_faq,image_path,sort_order FROM services ORDER BY sort_order, id`)
+	rows, err := db.Query(`SELECT id,slug,title,icon,short,detail,for_who,signs,goal,process,duration,professionals,what_to_bring,extra_faq,image_path,sort_order FROM services ORDER BY sort_order, id`)
+	if err != nil {
+		log.Printf("listServices: %v", err)
+		return nil
+	}
 	defer rows.Close()
 	var out []Service
 	for rows.Next() {
@@ -47,7 +54,11 @@ func deleteService(id int64) { db.Exec(`DELETE FROM services WHERE id=?`, id) }
 // ---------- Jobs ----------
 
 func listJobs() []Job {
-	rows, _ := db.Query(`SELECT id,slug,title,branch,type,status,description,requirements,image_path,sort_order FROM jobs ORDER BY sort_order, id`)
+	rows, err := db.Query(`SELECT id,slug,title,branch,type,status,description,requirements,image_path,sort_order FROM jobs ORDER BY sort_order, id`)
+	if err != nil {
+		log.Printf("listJobs: %v", err)
+		return nil
+	}
 	defer rows.Close()
 	var out []Job
 	for rows.Next() {
@@ -87,7 +98,11 @@ func deleteJob(id int64) { db.Exec(`DELETE FROM jobs WHERE id=?`, id) }
 // ---------- Articles ----------
 
 func listArticles() []Article {
-	rows, _ := db.Query(`SELECT id,slug,title,category,excerpt,content,image_path,sort_order FROM articles ORDER BY sort_order, id`)
+	rows, err := db.Query(`SELECT id,slug,title,category,excerpt,content,image_path,sort_order FROM articles ORDER BY sort_order, id`)
+	if err != nil {
+		log.Printf("listArticles: %v", err)
+		return nil
+	}
 	defer rows.Close()
 	var out []Article
 	for rows.Next() {
@@ -127,7 +142,11 @@ func deleteArticle(id int64) { db.Exec(`DELETE FROM articles WHERE id=?`, id) }
 // ---------- Facilities ----------
 
 func listFacilities() []Facility {
-	rows, _ := db.Query(`SELECT id,title,description,icon,image_path,sort_order FROM facilities ORDER BY sort_order, id`)
+	rows, err := db.Query(`SELECT id,title,description,icon,image_path,sort_order FROM facilities ORDER BY sort_order, id`)
+	if err != nil {
+		log.Printf("listFacilities: %v", err)
+		return nil
+	}
 	defer rows.Close()
 	var out []Facility
 	for rows.Next() {
@@ -160,7 +179,11 @@ func deleteFacility(id int64) { db.Exec(`DELETE FROM facilities WHERE id=?`, id)
 // ---------- Gallery ----------
 
 func listGallery() []GalleryPhoto {
-	rows, _ := db.Query(`SELECT id,category,caption,image_path,sort_order FROM gallery_photos ORDER BY category, sort_order, id`)
+	rows, err := db.Query(`SELECT id,category,caption,image_path,sort_order FROM gallery_photos ORDER BY category, sort_order, id`)
+	if err != nil {
+		log.Printf("listGallery: %v", err)
+		return nil
+	}
 	defer rows.Close()
 	var out []GalleryPhoto
 	for rows.Next() {
@@ -193,7 +216,11 @@ func deleteGalleryPhoto(id int64) { db.Exec(`DELETE FROM gallery_photos WHERE id
 // ---------- Team ----------
 
 func listTeam() []TeamMember {
-	rows, _ := db.Query(`SELECT id,name,role,image_path,sort_order FROM team_members ORDER BY sort_order, id`)
+	rows, err := db.Query(`SELECT id,name,role,image_path,sort_order FROM team_members ORDER BY sort_order, id`)
+	if err != nil {
+		log.Printf("listTeam: %v", err)
+		return nil
+	}
 	defer rows.Close()
 	var out []TeamMember
 	for rows.Next() {
@@ -226,7 +253,11 @@ func deleteTeamMember(id int64) { db.Exec(`DELETE FROM team_members WHERE id=?`,
 // ---------- Branches ----------
 
 func listBranches() []Branch {
-	rows, _ := db.Query(`SELECT id,slug,name,address,whatsapp,phone,maps_query,maps_url,schedules FROM branches ORDER BY id`)
+	rows, err := db.Query(`SELECT id,slug,name,address,whatsapp,phone,maps_query,maps_url,schedules FROM branches ORDER BY id`)
+	if err != nil {
+		log.Printf("listBranches: %v", err)
+		return nil
+	}
 	defer rows.Close()
 	var out []Branch
 	for rows.Next() {
@@ -266,7 +297,11 @@ func deleteBranch(id int64) { db.Exec(`DELETE FROM branches WHERE id=?`, id) }
 // ---------- Testimonials ----------
 
 func listTestimonials() []Testimonial {
-	rows, _ := db.Query(`SELECT id,name,role,quote,sort_order FROM testimonials ORDER BY sort_order, id`)
+	rows, err := db.Query(`SELECT id,name,role,quote,sort_order FROM testimonials ORDER BY sort_order, id`)
+	if err != nil {
+		log.Printf("listTestimonials: %v", err)
+		return nil
+	}
 	defer rows.Close()
 	var out []Testimonial
 	for rows.Next() {
